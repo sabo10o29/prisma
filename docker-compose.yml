@@ -1,0 +1,38 @@
+version: "3.9"
+
+services:
+  mysql:
+    image: mysql:8.0.27
+    container_name: "mysql-container"
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: mysql
+      MYSQL_DATABASE: db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    restart: always
+    volumes:
+      # Prismaで生成したsqlでDBを初期化する
+      # docker-entrypoint-initdb.di直下に配置されたスクリプトファイルの実行または、SQLファイルで初期化する機能を利用
+      # hoge/prismaに置いたinitdb.shを実行
+      # hoge/prisma以下のprisma migrate devで生成したsqlファイルを再帰的に検索・実行する
+      # privileges.sqlではprisma migrateを実行できるようにするための権限付与用SQLファイル
+      - ./hoge/prisma:/docker-entrypoint-initdb.d
+    networks:
+      - mysql-network
+
+  workspace:
+    container_name: "workspace-container"
+    working_dir: "/var/workspace"
+    build:
+      dockerfile: ./docker/Dockerfile
+    volumes:
+      - ./:/var/workspace
+    command: /bin/sh -c "while sleep 1000; do :; done"
+    networks:
+      - mysql-network
+
+networks:
+  mysql-network:
+    driver: bridge
