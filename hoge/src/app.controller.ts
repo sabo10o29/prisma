@@ -10,7 +10,8 @@ export class AppController {
   getHello(): string {
     const configService = new ConfigService();
     const databaseUrl = configService.get<string>('DATABASE_URL');
-    console.log('@@@@@@', databaseUrl);
+    const host = configService.get<string>('DB_HOST');
+    console.log('@@@@@@', databaseUrl, host);
     return this.appService.getHello();
   }
 }
